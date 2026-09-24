@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bầu cử Ban Chấp Hành Chi Đoàn</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'union-blue': '#00529c', /* Cập nhật màu xanh chuẩn Đoàn */
+                        'union-red': '#cc0000',
+                    },
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f0fdf4; }
+        .candidate-card.selected { border-color: #10b981; background-color: #ecfdf5; transform: scale(1.02); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); }
+        .candidate-card { transition: all 0.3s ease; }
+        
+        /* Podium Styles */
+        .podium-rank-1 { transform: scale(1.15); z-index: 10; border: 4px solid #fbbf24; box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.4); }
+        .podium-rank-2 { transform: scale(1.05); z-index: 9; border: 4px solid #9ca3af; }
+        .podium-rank-3 { transform: scale(0.95); z-index: 8; border: 4px solid #cd7f32; }
+        
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 50; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 12px 24px; border-radius: 8px; color: white; font-weight: bold; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Loader */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #003399; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: auto;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 flex flex-col relative">
+
+    <!-- Toast Messages -->
+    <div id="toast-container"></div>
+
+    <!-- Header -->
+    <header class="bg-union-blue text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-6 flex flex-col items-center text-center">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="bg-white p-1 rounded-full shadow-md">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/1/17/Huy_hi%E1%BB%87u_%C4%90o%C3%A0n_Thanh_ni%C3%AAn_C%E1%BB%99ng_s%E1%BA%A3n_H%E1%BB%93_Ch%C3%AD_Minh.svg" alt="Logo Đoàn" class="w-16 h-16 md:w-20 md:h-20 object-contain">
+                </div>
+                <div class="text-left">
+                    <h1 class="text-sm md:text-lg font-bold uppercase tracking-wider text-blue-100">Đoàn TNCS Hồ Chí Minh Trường THPT Phan Huy Chú - Đống Đa</h1>
+                    <h2 class="text-lg md:text-2xl font-black uppercase tracking-widest text-white mt-1">CHI ĐOÀN 11A1-K29</h2>
+                </div>
+            </div>
+            <div class="w-full border-t border-blue-400/30 my-2"></div>
+            <h3 class="text-xl md:text-3xl font-extrabold text-yellow-300 uppercase drop-shadow-md mt-2">
+                Bầu Ban Chấp Hành Chi Đoàn<br>
+                <span class="text-lg md:text-2xl text-white font-bold">Nhiệm Kỳ 2026 - 2027</span>
+            </h3>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main id="app-container" class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
+        <!-- Initial Loading State -->
+        <div id="loading-view" class="text-center py-20">
+            <div class="loader"></div>
+            <p class="mt-4 text-gray-500 font-medium">Đang tải dữ liệu bầu cử...</p>
+        </div>
+
+        <!-- 1. Voter View (Default) -->
+        <div id="voter-view" class="hidden">
+            <!-- Setup Phase -->
+            <div id="phase-setup" class="hidden bg-white p-10 rounded-2xl shadow-md text-center max-w-2xl mx-auto border border-gray-100">
+                <i class="fas fa-hourglass-start text-5xl text-yellow-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Cuộc bầu cử chưa bắt đầu</h2>
+                <p class="text-gray-600">Ban tổ chức đang chuẩn bị danh sách. Vui lòng quay lại sau.</p>
+            </div>
+
+            <!-- Active Voting Phase -->
+            <div id="phase-active" class="hidden">
+                <div id="vote-rules" class="bg-blue-50 border-l-4 border-union-blue p-4 rounded-r-lg mb-8 shadow-sm flex items-start gap-3">
+                    <i class="fas fa-info-circle text-union-blue text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-union-blue">Quy định bầu cử:</h4>
+                        <p class="text-gray-700">Mỗi lượt bầu chọn chỉ được bầu <b>TỐI THIỂU và TỐI ĐA 3 NGƯỜI</b>. Bạn không thể nộp phiếu nếu không chọn đủ số lượng.</p>
+                        <p class="mt-2 font-bold text-lg">
+                            Đã chọn: <span id="selection-count" class="text-red-500">0</span> / 3
+                        </p>
+                    </div>
+                </div>
+
+                <div id="voter-candidates-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Candidates will be injected here -->
+                </div>
+
+                <div class="mt-12 text-center pb-8">
+                    <button id="btn-submit-vote" disabled class="bg-gray-400 text-white font-bold py-4 px-12 rounded-full text-lg shadow-lg cursor-not-allowed transition-all duration-300">
+                        CHƯA CHỌN ĐỦ 3 ỨNG CỬ VIÊN
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voted State -->
+            <div id="phase-voted" class="hidden bg-white p-10 rounded-2xl shadow-md text-center max-w-2xl mx-auto border border-green-100">
+                <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Bỏ phiếu thành công!</h2>
+                <p class="text-gray-600">Cảm ơn bạn đã hoàn thành quyền bầu cử. Vui lòng chờ kết quả từ Ban tổ chức.</p>
+            </div>
+        </div>
+
+        <!-- 2. Results View -->
+        <div id="results-view" class="hidden">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-black text-union-blue uppercase tracking-wider mb-2">Kết quả Bầu cử</h2>
+                <div class="w-24 h-1.5 bg-yellow-400 mx-auto rounded-full"></div>
+            </div>
+
+            <!-- Podium for Top 3 -->
+            <div id="podium-container" class="flex flex-col md:flex-row justify-center items-end gap-6 md:gap-10 mb-16 pt-10">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Rest of Candidates -->
+            <div id="other-results-container" class="hidden">
+                <h3 class="text-xl font-bold text-gray-700 mb-6 text-center border-b pb-2">Các ứng cử viên khác</h3>
+                <div id="other-results-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Admin Login View -->
+        <div id="admin-login-view" class="hidden max-w-md mx-auto mt-10 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+            <div class="text-center mb-6">
+                <i class="fas fa-lock text-4xl text-union-blue mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Quản trị viên</h2>
+            </div>
+            <form id="admin-login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản</label>
+                    <input type="text" id="admin-username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-union-blue outline-none" placeholder="Nhập tài khoản" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                    <input type="password" id="admin-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-union-blue outline-none" placeholder="Nhập mật khẩu" required>
+                </div>
+                <button type="submit" class="w-full bg-union-blue text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors shadow-md">
+                    Đăng nhập
+                </button>
+                <button type="button" id="btn-back-to-home" class="w-full mt-2 text-gray-500 text-sm hover:text-union-blue">
+                    &larr; Quay lại trang chủ
+                </button>
+            </form>
+        </div>
+
+        <!-- 4. Admin Dashboard View -->
+        <div id="admin-dashboard-view" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-2xl font-bold text-union-blue"><i class="fas fa-user-shield mr-2"></i>Bảng điều khiển Admin</h2>
+                <div class="flex gap-2 mt-4 md:mt-0">
+                    <span id="admin-status-badge" class="px-4 py-2 rounded-lg font-bold text-sm flex items-center">
+                        Trạng thái: Đang tải...
+                    </span>
+                    <button id="btn-logout" class="bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition-colors text-sm">
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Controls & QR -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Actions -->
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-t-4 border-union-blue">
+                        <h3 class="font-bold text-lg mb-4 text-gray-800">Điều khiển Bầu cử</h3>
+                        <div class="space-y-3">
+                            <button id="btn-phase-setup" class="w-full p-3 rounded-xl border-2 font-medium flex items-center justify-center gap-2 border-gray-200 hover:border-yellow-400 text-gray-600 transition-all">
+                                <i class="fas fa-wrench"></i> Về trạng thái Chuẩn bị
+                            </button>
+                            <button id="btn-phase-active" class="w-full p-3 rounded-xl border-2 font-medium flex items-center justify-center gap-2 border-gray-200 hover:border-green-500 text-gray-600 transition-all">
+                                <i class="fas fa-play"></i> Publish & Mở Bầu chọn
+                            </button>
+                            <button id="btn-phase-ended" class="w-full p-3 rounded-xl border-2 font-medium flex items-center justify-center gap-2 border-gray-200 hover:border-red-500 text-gray-600 transition-all">
+                                <i class="fas fa-stop"></i> Kết thúc & Xem Kết quả
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-t-4 border-purple-500 hidden" id="qr-container-card">
+                        <h3 class="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2"><i class="fas fa-qrcode text-purple-500"></i> Mã QR Quét Bầu Chọn</h3>
+                        <div class="bg-gray-50 p-4 rounded-xl flex flex-col items-center border border-gray-100">
+                            <div id="qrcode-display" class="bg-white p-2 rounded-lg shadow-sm"></div>
+                            <p class="text-xs text-center text-gray-500 mt-3">Sử dụng điện thoại để quét và truy cập link bầu chọn.</p>
+                            <button id="btn-copy-link" class="mt-3 text-sm text-union-blue hover:underline"><i class="fas fa-link"></i> Copy Link</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candidate Management -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border-t-4 border-green-500">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 flex justify-between items-center">
+                        <span><i class="fas fa-users text-green-600 mr-2"></i>Quản lý Ứng cử viên</span>
+                        <span id="admin-candidate-count" class="bg-gray-100 text-gray-600 text-sm py-1 px-3 rounded-full">0 người</span>
+                    </h3>
+                    
+                    <form id="add-candidate-form" class="flex flex-col sm:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200 items-center">
+                        <input type="text" id="cand-name" placeholder="Họ và tên..." class="flex-1 p-3 border border-gray-300 rounded-lg outline-none focus:border-green-500 w-full" required>
+                        <div class="flex-1 w-full relative">
+                            <input type="file" id="cand-img-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-union-blue hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg bg-white" required>
+                        </div>
+                        <button type="submit" id="btn-add-cand" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors shrink-0">
+                            <i class="fas fa-plus"></i> Thêm
+                        </button>
+                    </form>
+
+                    <div id="admin-candidates-list" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                        <!-- Admin candidates injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Link Footer -->
+    <footer class="mt-auto py-6 text-center text-sm text-gray-400">
+        <p>&copy; 2026 Đoàn TNCS Hồ Chí Minh Chi Đoàn 11A1-K29.</p>
+        <button id="btn-show-admin-login" class="mt-2 hover:text-gray-600 transition-colors"><i class="fas fa-cog"></i> Dành cho Quản trị</button>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'bch-election-app-k29';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            // Placeholder - Users hosting elsewhere must replace this block with their Firebase config
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Variables
+        let currentUser = null;
+        let isAdminLoggedIn = false;
+        let currentPhase = 'setup'; // setup, active, ended
+        let candidatesData = [];
+        let selectedCandidateIds = [];
+        const MAX_VOTES = 3;
+        const ADMIN_USER = 'a1k29.phc';
+        const ADMIN_PASS = 'Abc@123';
+        const LOCAL_STORAGE_KEY = `voted_${appId}`;
+
+        // DOM Elements
+        const views = {
+            loading: document.getElementById('loading-view'),
+            voter: document.getElementById('voter-view'),
+            results: document.getElementById('results-view'),
+            adminLogin: document.getElementById('admin-login-view'),
+            adminDashboard: document.getElementById('admin-dashboard-view')
+        };
+        
+        const phaseDivs = {
+            setup: document.getElementById('phase-setup'),
+            active: document.getElementById('phase-active'),
+            voted: document.getElementById('phase-voted')
+        };
+
+        // Paths based on requirements: /artifacts/{appId}/public/data/...
+        const candidatesPath = collection(db, 'artifacts', appId, 'public', 'data', 'candidates');
+        const settingsDocPath = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'election_state');
+
+        // Helpers
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function switchView(viewName) {
+            Object.values(views).forEach(v => v.classList.add('hidden'));
+            views[viewName].classList.remove('hidden');
+            
+            // Adjust footer visibility
+            const footerAdminLink = document.getElementById('btn-show-admin-login');
+            if (viewName === 'adminDashboard' || viewName === 'adminLogin') {
+                footerAdminLink.classList.add('hidden');
+            } else {
+                footerAdminLink.classList.remove('hidden');
+            }
+        }
+
+        async function initApp() {
+            try {
+                // Auth setup
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        setupListeners();
+                    }
+                });
+            } catch (error) {
+                console.error("Initialization error:", error);
+                showToast("Lỗi kết nối máy chủ!", "error");
+                views.loading.innerHTML = "<p class='text-red-500 font-bold'>Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra lại cấu hình Firebase.</p>";
+            }
+        }
+
+        function setupListeners() {
+            // Listen to Settings (Phase)
+            onSnapshot(settingsDocPath, (docSnap) => {
+                if (docSnap.exists()) {
+                    currentPhase = docSnap.data().phase;
+                } else {
+                    // Initialize if missing
+                    if (isAdminLoggedIn) {
+                        setDoc(settingsDocPath, { phase: 'setup' });
+                    }
+                    currentPhase = 'setup';
+                }
+                updateUIPerState();
+            }, (err) => { console.error("Error listening to settings:", err); });
+
+            // Listen to Candidates
+            onSnapshot(candidatesPath, (snapshot) => {
+                candidatesData = [];
+                snapshot.forEach((doc) => {
+                    candidatesData.push({ id: doc.id, ...doc.data() });
+                });
+                renderAdminCandidates();
+                if (currentPhase === 'active') renderVoterCandidates();
+                if (currentPhase === 'ended') renderResults();
+                updateUIPerState();
+            }, (err) => { console.error("Error listening to candidates:", err); });
+        }
+
+        function updateUIPerState() {
+            // If in admin mode, keep admin view but update badges
+            if (isAdminLoggedIn) {
+                switchView('adminDashboard');
+                updateAdminBadges();
+                return;
+            }
+
+            // Normal user routing
+            if (currentPhase === 'ended') {
+                switchView('results');
+                renderResults();
+            } else {
+                switchView('voter');
+                Object.values(phaseDivs).forEach(d => d.classList.add('hidden'));
+                
+                if (currentPhase === 'setup') {
+                    phaseDivs.setup.classList.remove('hidden');
+                } else if (currentPhase === 'active') {
+                    const hasVoted = localStorage.getItem(LOCAL_STORAGE_KEY) === 'true';
+                    if (hasVoted) {
+                        phaseDivs.voted.classList.remove('hidden');
+                    } else {
+                        phaseDivs.active.classList.remove('hidden');
+                        renderVoterCandidates();
+                    }
+                }
+            }
+        }
+
+        function renderVoterCandidates() {
+            const grid = document.getElementById('voter-candidates-grid');
+            grid.innerHTML = '';
+            
+            candidatesData.forEach(cand => {
+                const isSelected = selectedCandidateIds.includes(cand.id);
+                const card = document.createElement('div');
+                card.className = `candidate-card bg-white rounded-2xl overflow-hidden border-2 cursor-pointer shadow-sm relative ${isSelected ? 'selected' : 'border-gray-100'}`;
+                
+                card.innerHTML = `
+                    <div class="aspect-[3/4] bg-gray-100 overflow-hidden relative">
+                        <img src="${cand.imageUrl}" onerror="this.src='https://placehold.co/300x400/e2e8f0/475569?text=No+Image'" alt="${cand.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4 text-center">
+                        <h4 class="font-bold text-gray-800 leading-tight h-10 flex items-center justify-center">${cand.name}</h4>
+                    </div>
+                    <div class="absolute top-3 right-3 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-green-500 border-green-500 text-white' : 'bg-white/80 border-gray-300 text-transparent'}">
+                        <i class="fas fa-check"></i>
+                    </div>
+                `;
+                
+                card.onclick = () => toggleSelection(cand.id);
+                grid.appendChild(card);
+            });
+            
+            updateVoteButton();
+        }
+
+        function toggleSelection(id) {
+            if (selectedCandidateIds.includes(id)) {
+                selectedCandidateIds = selectedCandidateIds.filter(cId => cId !== id);
+            } else {
+                if (selectedCandidateIds.length < MAX_VOTES) {
+                    selectedCandidateIds.push(id);
+                } else {
+                    showToast(`Chỉ được chọn tối đa ${MAX_VOTES} người!`, "error");
+                }
+            }
+            renderVoterCandidates();
+        }
+
+        function updateVoteButton() {
+            const countSpan = document.getElementById('selection-count');
+            const btn = document.getElementById('btn-submit-vote');
+            const count = selectedCandidateIds.length;
+            
+            countSpan.textContent = count;
+            
+            if (count === MAX_VOTES) {
+                countSpan.className = 'text-green-600 font-black text-xl';
+                btn.disabled = false;
+                btn.className = "bg-union-blue text-white font-bold py-4 px-12 rounded-full text-lg shadow-xl hover:bg-blue-800 hover:scale-105 transition-all duration-300 cursor-pointer";
+                btn.textContent = "XÁC NHẬN BỎ PHIẾU";
+            } else {
+                countSpan.className = 'text-red-500 font-black text-xl';
+                btn.disabled = true;
+                btn.className = "bg-gray-400 text-white font-bold py-4 px-12 rounded-full text-lg shadow-sm cursor-not-allowed transition-all duration-300";
+                btn.textContent = `CHƯA CHỌN ĐỦ ${MAX_VOTES} NGƯỜI`;
+            }
+        }
+
+        document.getElementById('btn-submit-vote').addEventListener('click', async () => {
+            if (!currentUser) return;
+            if (selectedCandidateIds.length !== MAX_VOTES) return;
+            
+            const btn = document.getElementById('btn-submit-vote');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG XỬ LÝ...';
+            
+            try {
+                // Update votes for selected candidates
+                for (const candId of selectedCandidateIds) {
+                    const candRef = doc(db, 'artifacts', appId, 'public', 'data', 'candidates', candId);
+                    const candObj = candidatesData.find(c => c.id === candId);
+                    if (candObj) {
+                        const currentVotes = candObj.votes || 0;
+                        await updateDoc(candRef, { votes: currentVotes + 1 });
+                    }
+                }
+                
+                localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
+                showToast("Bỏ phiếu thành công!");
+                updateUIPerState(); // will trigger phase-voted view
+            } catch (error) {
+                console.error("Submit error:", error);
+                showToast("Có lỗi xảy ra khi gửi phiếu. Vui lòng thử lại.", "error");
+                updateVoteButton();
+            }
+        });
+
+        function renderResults() {
+            // Sort by votes descending
+            const sorted = [...candidatesData].sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            const top3 = sorted.slice(0, 3);
+            const others = sorted.slice(3);
+            
+            const podiumContainer = document.getElementById('podium-container');
+            const othersContainer = document.getElementById('other-results-container');
+            const othersGrid = document.getElementById('other-results-grid');
+            
+            podiumContainer.innerHTML = '';
+            othersGrid.innerHTML = '';
+            
+            if (sorted.length === 0) {
+                podiumContainer.innerHTML = '<p class="text-gray-500">Chưa có dữ liệu ứng cử viên.</p>';
+                return;
+            }
+
+            // Rank 2 (Silver)
+            if (top3[1]) podiumContainer.appendChild(createPodiumCard(top3[1], 2));
+            // Rank 1 (Gold)
+            if (top3[0]) podiumContainer.appendChild(createPodiumCard(top3[0], 1));
+            // Rank 3 (Bronze)
+            if (top3[2]) podiumContainer.appendChild(createPodiumCard(top3[2], 3));
+
+            // Others
+            if (others.length > 0) {
+                othersContainer.classList.remove('hidden');
+                others.forEach(cand => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 flex flex-col items-center p-3';
+                    el.innerHTML = `
+                        <img src="${cand.imageUrl}" onerror="this.src='https://placehold.co/150x150/e2e8f0/475569?text=No+Image'" class="w-16 h-16 object-cover rounded-full border border-gray-200 mb-2">
+                        <h4 class="font-semibold text-gray-800 text-xs text-center leading-tight mb-2 flex-1">${cand.name}</h4>
+                        <p class="text-union-blue font-bold mt-auto bg-blue-50 px-3 py-1 rounded-full text-sm">${cand.votes || 0} phiếu</p>
+                    `;
+                    othersGrid.appendChild(el);
+                });
+            } else {
+                othersContainer.classList.add('hidden');
+            }
+        }
+
+        function createPodiumCard(cand, rank) {
+            const el = document.createElement('div');
+            
+            let styleClass = '';
+            let medalColor = '';
+            let rankNumClass = '';
+            
+            if (rank === 1) { 
+                styleClass = 'podium-rank-1 order-1 md:order-2'; 
+                medalColor = 'text-yellow-400';
+                rankNumClass = 'bg-gradient-to-br from-yellow-300 to-yellow-600 text-white';
+            }
+            if (rank === 2) { 
+                styleClass = 'podium-rank-2 order-2 md:order-1 mt-4 md:mt-0'; 
+                medalColor = 'text-gray-400';
+                rankNumClass = 'bg-gradient-to-br from-gray-300 to-gray-500 text-white';
+            }
+            if (rank === 3) { 
+                styleClass = 'podium-rank-3 order-3 md:order-3 mt-4 md:mt-0'; 
+                medalColor = 'text-[#cd7f32]';
+                rankNumClass = 'bg-gradient-to-br from-[#d4af37] to-[#a0522d] text-white';
+            }
+
+            el.className = `flex flex-col items-center relative ${styleClass} rounded-2xl overflow-hidden bg-white w-48 md:w-56`;
+            
+            el.innerHTML = `
+                <div class="absolute top-2 left-2 z-20">
+                    <i class="fas fa-medal text-3xl drop-shadow-md ${medalColor}"></i>
+                </div>
+                <div class="w-full aspect-[3/4] bg-gray-100">
+                     <img src="${cand.imageUrl}" onerror="this.src='https://placehold.co/300x400/e2e8f0/475569?text=No+Image'" class="w-full h-full object-cover">
+                </div>
+                <div class="p-4 text-center w-full bg-gradient-to-t from-gray-50 to-white relative pb-8">
+                    <h4 class="font-bold text-gray-800 leading-tight">${cand.name}</h4>
+                    <p class="text-2xl font-black mt-1 ${medalColor}">${cand.votes || 0} <span class="text-sm font-normal text-gray-500">phiếu</span></p>
+                </div>
+                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center font-black text-xl shadow-lg border-2 border-white ${rankNumClass} z-20">
+                    ${rank}
+                </div>
+            `;
+            return el;
+        }
+
+        // Navigations
+        document.getElementById('btn-show-admin-login').addEventListener('click', () => { switchView('adminLogin'); });
+        document.getElementById('btn-back-to-home').addEventListener('click', () => { updateUIPerState(); });
+        
+        // Admin Login
+        document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('admin-username').value;
+            const p = document.getElementById('admin-password').value;
+            if (u === ADMIN_USER && p === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                showToast("Đăng nhập thành công!");
+                
+                // Init settings doc if not exist
+                if (!currentUser) return; // Guard
+                setDoc(settingsDocPath, { phase: currentPhase }, { merge: true });
+                
+                updateUIPerState();
+            } else {
+                showToast("Sai tài khoản hoặc mật khẩu!", "error");
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            isAdminLoggedIn = false;
+            document.getElementById('admin-login-form').reset();
+            updateUIPerState();
+        });
+
+        // Helper to resize image and convert to Base64 (prevents exceeding Firebase 1MB doc limit)
+        const resizeAndConvertImage = (file, maxSize = 600) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height *= maxSize / width;
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width *= maxSize / height;
+                                height = maxSize;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        // Save as JPEG with 80% quality to ensure small payload
+                        resolve(canvas.toDataURL('image/jpeg', 0.8)); 
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        };
+
+        // Admin Candidate Management
+        document.getElementById('add-candidate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+            
+            const name = document.getElementById('cand-name').value;
+            const fileInput = document.getElementById('cand-img-file');
+            const btnAdd = document.getElementById('btn-add-cand');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast("Vui lòng chọn ảnh!", "error");
+                return;
+            }
+            
+            // Set loading state
+            btnAdd.disabled = true;
+            btnAdd.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+            
+            try {
+                const file = fileInput.files[0];
+                // Resize image and convert to Base64
+                const base64Img = await resizeAndConvertImage(file);
+                
+                await addDoc(candidatesPath, { name: name, imageUrl: base64Img, votes: 0 });
+                document.getElementById('add-candidate-form').reset();
+                showToast("Đã thêm ứng cử viên!");
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi khi thêm ứng cử viên. Ảnh bị lỗi?", "error");
+            } finally {
+                // Restore button
+                btnAdd.disabled = false;
+                btnAdd.innerHTML = '<i class="fas fa-plus"></i> Thêm';
+            }
+        });
+
+        window.deleteCandidate = async (id) => {
+            if (!currentUser) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'candidates', id));
+                showToast("Đã xóa ứng cử viên");
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi khi xóa.", "error");
+            }
+        };
+
+        function renderAdminCandidates() {
+            const list = document.getElementById('admin-candidates-list');
+            document.getElementById('admin-candidate-count').textContent = `${candidatesData.length} người`;
+            list.innerHTML = '';
+            
+            if (candidatesData.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có ứng cử viên nào.</p>';
+                return;
+            }
+
+            candidatesData.forEach(cand => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${cand.imageUrl}" onerror="this.src='https://placehold.co/100x100/e2e8f0/475569?text=X'" class="w-12 h-12 rounded-full object-cover border border-gray-200 shrink-0">
+                        <div class="min-w-0">
+                            <p class="font-bold text-gray-800 truncate">${cand.name}</p>
+                            <p class="text-xs text-gray-500">${cand.votes || 0} phiếu</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteCandidate('${cand.id}')" class="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors shrink-0">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        // Admin Phase Controls
+        const btnSetup = document.getElementById('btn-phase-setup');
+        const btnActive = document.getElementById('btn-phase-active');
+        const btnEnded = document.getElementById('btn-phase-ended');
+        
+        async function setPhase(newPhase) {
+            if (!currentUser) return;
+            try {
+                await setDoc(settingsDocPath, { phase: newPhase }, { merge: true });
+                showToast(`Đã chuyển sang trạng thái: ${newPhase}`);
+            } catch (err) {
+                console.error(err);
+                showToast("Lỗi khi cập nhật trạng thái.", "error");
+            }
+        }
+
+        btnSetup.addEventListener('click', () => setPhase('setup'));
+        btnActive.addEventListener('click', () => {
+            setPhase('active');
+            generateQRCode();
+        });
+        btnEnded.addEventListener('click', () => setPhase('ended'));
+
+        function updateAdminBadges() {
+            const badge = document.getElementById('admin-status-badge');
+            const qrCard = document.getElementById('qr-container-card');
+            
+            // Reset styles
+            [btnSetup, btnActive, btnEnded].forEach(b => {
+                b.classList.remove('border-yellow-400', 'bg-yellow-50', 'border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+                b.classList.add('border-gray-200');
+            });
+
+            if (currentPhase === 'setup') {
+                badge.textContent = 'Trạng thái: Chuẩn bị';
+                badge.className = 'px-4 py-2 rounded-lg font-bold text-sm flex items-center bg-yellow-100 text-yellow-800';
+                btnSetup.classList.replace('border-gray-200', 'border-yellow-400');
+                btnSetup.classList.add('bg-yellow-50');
+                qrCard.classList.add('hidden');
+            } else if (currentPhase === 'active') {
+                badge.textContent = 'Trạng thái: Đang Bầu Chọn';
+                badge.className = 'px-4 py-2 rounded-lg font-bold text-sm flex items-center bg-green-100 text-green-800';
+                btnActive.classList.replace('border-gray-200', 'border-green-500');
+                btnActive.classList.add('bg-green-50');
+                qrCard.classList.remove('hidden');
+                generateQRCode();
+            } else if (currentPhase === 'ended') {
+                badge.textContent = 'Trạng thái: Kết thúc';
+                badge.className = 'px-4 py-2 rounded-lg font-bold text-sm flex items-center bg-red-100 text-red-800';
+                btnEnded.classList.replace('border-gray-200', 'border-red-500');
+                btnEnded.classList.add('bg-red-50');
+                qrCard.classList.add('hidden');
+            }
+        }
+
+        let qrCodeInstance = null;
+        function generateQRCode() {
+            const container = document.getElementById('qrcode-display');
+            container.innerHTML = ''; // clear previous
+            
+            // Get URL without query params or hash for clean QR
+            const currentUrl = window.location.href.split('?')[0].split('#')[0];
+            
+            qrCodeInstance = new QRCode(container, {
+                text: currentUrl,
+                width: 180,
+                height: 180,
+                colorDark : "#003399",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+        
+        document.getElementById('btn-copy-link').addEventListener('click', () => {
+            const currentUrl = window.location.href.split('?')[0].split('#')[0];
+            navigator.clipboard.writeText(currentUrl).then(() => {
+                showToast("Đã copy link!");
+            }).catch(() => {
+                // Fallback for iframe environments
+                const tempInput = document.createElement("input");
+                tempInput.value = currentUrl;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                showToast("Đã copy link!");
+            });
+        });
+
+        // Initialize!
+        window.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
