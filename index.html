@@ -22,7 +22,10 @@
     <header class="bg-doan text-white py-6 shadow-md">
         <div class="container mx-auto px-4 flex flex-col items-center text-center">
             <div class="flex items-center mb-4">
-                <img src="https://upload.wikimedia.org/wikipedia/vi/thumb/a/a3/Huy_hieu_Doan.svg/1024px-Huy_hieu_Doan.svg.png" alt="Logo Đoàn" class="w-16 h-16 mr-4 object-contain">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/a/a3/Huy_hieu_Doan.svg" 
+                     alt="Logo Đoàn" 
+                     class="w-16 h-16 mr-4 object-contain"
+                     onerror="this.onerror=null; this.src='https://hoithoatviendiemdem.mediacdn.vn/thumb_w/640/2021/3/23/huy-hieu-doan-16164906560411883395992.png';">
                 <div>
                     <h2 class="text-xl font-semibold uppercase tracking-wide">Đoàn TNCS Hồ Chí Minh Trường THPT Phan Huy Chú - Đống Đa</h2>
                     <h1 class="text-3xl font-bold uppercase mt-1">Chi Đoàn 11A1-K29</h1>
@@ -63,11 +66,12 @@
 
         <!-- Admin Dashboard -->
         <div id="admin-screen" class="hidden space-y-8">
-            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow">
+            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow flex-wrap gap-4">
                 <h3 class="text-xl font-bold text-gray-800">Bảng điều khiển Admin</h3>
-                <div class="space-x-3">
+                <div class="space-x-2 sm:space-x-3 flex flex-wrap gap-y-2">
                     <button onclick="toggleVotingStatus()" id="btn-toggle-voting" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Mở bình chọn</button>
                     <button onclick="showResultsScreen()" class="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">Xem kết quả</button>
+                    <button onclick="resetMyVote()" class="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600">Reset Phiếu của tôi</button>
                     <button onclick="logoutAdmin()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Đăng xuất</button>
                 </div>
             </div>
@@ -106,7 +110,7 @@
                 <div id="qr-code-container" class="mx-auto p-4 bg-white border-4 border-doan rounded-xl shadow-sm inline-block">
                     <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
                 </div>
-                <div class="mt-4 text-lg font-mono bg-gray-100 px-4 py-2 rounded">
+                <div class="mt-4 text-lg font-mono bg-gray-100 px-4 py-2 rounded break-all w-full max-w-md">
                     <a href="#" id="voting-link" target="_blank" class="text-blue-600 hover:underline">Link web</a>
                 </div>
             </div>
@@ -114,12 +118,22 @@
 
         <!-- Voting Screen -->
         <div id="voting-screen" class="hidden">
+            <!-- Thông báo chưa mở bầu chọn -->
             <div id="voting-closed-msg" class="hidden text-center py-20 bg-white rounded-xl shadow">
                 <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 <h2 class="text-2xl font-bold text-gray-800">Chưa mở bầu chọn</h2>
                 <p class="text-gray-500 mt-2">Vui lòng chờ Admin kích hoạt hệ thống bỏ phiếu.</p>
             </div>
 
+            <!-- Thông báo ĐÃ BẦU CHỌN RỒI -->
+            <div id="already-voted-msg" class="hidden text-center py-20 bg-white rounded-xl shadow">
+                <svg class="w-20 h-20 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h2 class="text-3xl font-bold text-gray-800">Bạn đã bỏ phiếu thành công!</h2>
+                <p class="text-gray-600 mt-3 text-lg">Mỗi người chỉ được tham gia bầu chọn 1 lần duy nhất để đảm bảo tính công bằng.</p>
+                <p class="text-gray-500 mt-1">Cảm ơn bạn đã tham gia bầu cử Ban Chấp Hành Chi Đoàn.</p>
+            </div>
+
+            <!-- Khu vực bầu chọn -->
             <div id="voting-open-section" class="hidden">
                 <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded shadow-sm">
                     <p class="text-yellow-800 font-medium text-center text-lg">
@@ -176,7 +190,7 @@
         import { getDatabase, ref, onValue, push, remove, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         // ==========================================
-        // CẤU HÌNH FIREBASE ĐÃ ĐƯỢC CẬP NHẬT
+        // CẤU HÌNH FIREBASE - (BẠN ĐIỀN API KEY CỦA BẠN VÀO NHÉ)
         // ==========================================
         const firebaseConfig = {
             apiKey: "API_KEY_CUA_BAN", 
@@ -223,7 +237,7 @@
             renderAdminCandidates();
             renderVotingCandidates();
             renderResults();
-            updateAdminDashboardUI();
+            updateVotingUIVisibility();
         }
 
         // Logic thay đổi màn hình
@@ -231,9 +245,10 @@
         window.showAdminScreen = () => { 
             if(sessionStorage.getItem('isAdmin') === 'true') {
                 hideAll(); document.getElementById('admin-screen').classList.remove('hidden'); 
+                updateVotingUIVisibility(); // Cập nhật lại UI admin
             } else { alert("Vui lòng đăng nhập!"); window.showLoginScreen(); }
         }
-        window.showVotingScreen = () => { hideAll(); document.getElementById('voting-screen').classList.remove('hidden'); }
+        window.showVotingScreen = () => { hideAll(); document.getElementById('voting-screen').classList.remove('hidden'); updateVotingUIVisibility(); }
         window.showResultsScreen = () => { hideAll(); document.getElementById('results-screen').classList.remove('hidden'); }
         
         function hideAll() {
@@ -260,7 +275,16 @@
             await set(ref(db, 'settings/isVotingOpen'), !isVotingOpen);
         }
 
-        function updateAdminDashboardUI() {
+        // Dành cho admin muốn reset phiếu của chính thiết bị mình để test
+        window.resetMyVote = () => {
+            localStorage.removeItem('hasVoted11A1');
+            alert("Đã reset trạng thái bỏ phiếu trên thiết bị này. Bạn có thể bầu lại (chỉ dùng để test).");
+            updateVotingUIVisibility();
+        }
+
+        // Cập nhật giao diện bầu chọn dựa vào trạng thái đóng/mở và cờ LocalStorage
+        function updateVotingUIVisibility() {
+            // Cập nhật Dashboard Admin
             const btn = document.getElementById('btn-toggle-voting');
             const qrSection = document.getElementById('qr-section');
             if(isVotingOpen) {
@@ -282,13 +306,27 @@
                 qrSection.classList.remove('flex');
             }
 
-            // UI cho Voter
-            if(isVotingOpen) {
-                document.getElementById('voting-closed-msg').classList.add('hidden');
-                document.getElementById('voting-open-section').classList.remove('hidden');
+            // Logic cho màn hình người vote
+            const hasVoted = localStorage.getItem('hasVoted11A1') === 'true';
+            const closedMsg = document.getElementById('voting-closed-msg');
+            const votedMsg = document.getElementById('already-voted-msg');
+            const openSection = document.getElementById('voting-open-section');
+
+            if (!isVotingOpen) {
+                // Đang đóng
+                closedMsg.classList.remove('hidden');
+                votedMsg.classList.add('hidden');
+                openSection.classList.add('hidden');
             } else {
-                document.getElementById('voting-closed-msg').classList.remove('hidden');
-                document.getElementById('voting-open-section').classList.add('hidden');
+                // Đang mở, kiểm tra xem đã vote chưa
+                closedMsg.classList.add('hidden');
+                if (hasVoted) {
+                    votedMsg.classList.remove('hidden');
+                    openSection.classList.add('hidden');
+                } else {
+                    votedMsg.classList.add('hidden');
+                    openSection.classList.remove('hidden');
+                }
             }
         }
 
@@ -416,10 +454,14 @@
                 
                 await update(ref(db), updates); // Cập nhật cộng dồn số vote
                 
-                alert("Bầu chọn thành công! Cảm ơn bạn.");
+                // LƯU TRẠNG THÁI ĐÃ VOTE VÀO TRÌNH DUYỆT
+                localStorage.setItem('hasVoted11A1', 'true');
+
                 selectedCandidates = [];
                 document.getElementById('selected-count').textContent = 0;
-                renderVotingCandidates();
+                
+                // Cập nhật lại giao diện, nó sẽ tự động chuyển sang màn hình "Bạn đã bỏ phiếu"
+                updateVotingUIVisibility();
                 
             } catch (error) {
                 console.error(error); alert("Có lỗi xảy ra, thử lại sau.");
