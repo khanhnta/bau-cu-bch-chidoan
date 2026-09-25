@@ -22,7 +22,7 @@
     <header class="bg-doan text-white py-6 shadow-md">
         <div class="container mx-auto px-4 flex flex-col items-center text-center">
             <div class="flex items-center mb-4">
-                <img src="https://upload.wikimedia.org/wikipedia/vi/a/a3/Huy_hieu_Doan.svg" 
+                <img src="https://upload.wikimedia.org/wikipedia/vi/0/09/Huy_Hi%E1%BB%87u_%C4%90o%C3%A0n.png?utm_source=vi.wikipedia.org&utm_campaign=index&utm_content=original" 
                      alt="Logo Đoàn" 
                      class="w-16 h-16 mr-4 object-contain"
                      onerror="this.onerror=null; this.src='https://hoithoatviendiemdem.mediacdn.vn/thumb_w/640/2021/3/23/huy-hieu-doan-16164906560411883395992.png';">
@@ -71,7 +71,8 @@
                 <div class="space-x-2 sm:space-x-3 flex flex-wrap gap-y-2">
                     <button onclick="toggleVotingStatus()" id="btn-toggle-voting" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Mở bình chọn</button>
                     <button onclick="showResultsScreen()" class="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">Xem kết quả</button>
-                    <button onclick="resetMyVote()" class="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600">Reset Phiếu của tôi</button>
+                    <button onclick="resetMyVote()" class="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600">Reset Phiếu máy này</button>
+                    <button onclick="resetAllSystem()" class="px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-800 shadow">🔥 Reset TOÀN BỘ Hệ Thống</button>
                     <button onclick="logoutAdmin()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Đăng xuất</button>
                 </div>
             </div>
@@ -120,7 +121,7 @@
         <div id="voting-screen" class="hidden">
             <!-- Thông báo chưa mở bầu chọn -->
             <div id="voting-closed-msg" class="hidden text-center py-20 bg-white rounded-xl shadow">
-                <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2 2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 <h2 class="text-2xl font-bold text-gray-800">Chưa mở bầu chọn</h2>
                 <p class="text-gray-500 mt-2">Vui lòng chờ Admin kích hoạt hệ thống bỏ phiếu.</p>
             </div>
@@ -211,6 +212,7 @@
         let isVotingOpen = false;
         let selectedCandidates = [];
         let dataLoaded = false;
+        let serverResetTimestamp = 0;
 
         // Lắng nghe dữ liệu ứng cử viên từ Realtime Database
         onValue(ref(db, 'candidates'), (snapshot) => {
@@ -224,9 +226,19 @@
             updateAllUI();
         });
 
-        // Lắng nghe trạng thái mở/đóng bầu cử
-        onValue(ref(db, 'settings/isVotingOpen'), (snapshot) => {
-            isVotingOpen = snapshot.val() || false;
+        // Lắng nghe cài đặt hệ thống (trạng thái mở/đóng & timestamp reset)
+        onValue(ref(db, 'settings'), (snapshot) => {
+            const val = snapshot.val() || {};
+            isVotingOpen = val.isVotingOpen || false;
+            serverResetTimestamp = val.resetTimestamp || 0;
+            
+            // TỰ ĐỘNG RESET TRẠNG THÁI BẦU CHỌN CỦA THIẾT BỊ NẾU ADMIN VỪA RESET TOÀN BỘ HỆ THỐNG
+            const localVotedTime = parseInt(localStorage.getItem('votedTimestamp11A1') || '0', 10);
+            if (serverResetTimestamp > localVotedTime) {
+                localStorage.removeItem('hasVoted11A1');
+                localStorage.removeItem('votedTimestamp11A1');
+            }
+
             dataLoaded = true;
             updateAllUI();
         });
@@ -245,7 +257,7 @@
         window.showAdminScreen = () => { 
             if(sessionStorage.getItem('isAdmin') === 'true') {
                 hideAll(); document.getElementById('admin-screen').classList.remove('hidden'); 
-                updateVotingUIVisibility(); // Cập nhật lại UI admin
+                updateVotingUIVisibility();
             } else { alert("Vui lòng đăng nhập!"); window.showLoginScreen(); }
         }
         window.showVotingScreen = () => { hideAll(); document.getElementById('voting-screen').classList.remove('hidden'); updateVotingUIVisibility(); }
@@ -272,14 +284,47 @@
 
         // Mở / Đóng bầu chọn
         window.toggleVotingStatus = async () => {
-            await set(ref(db, 'settings/isVotingOpen'), !isVotingOpen);
+            await update(ref(db, 'settings'), { isVotingOpen: !isVotingOpen });
         }
 
-        // Dành cho admin muốn reset phiếu của chính thiết bị mình để test
+        // Dành cho admin muốn reset phiếu của riêng máy hiện tại để test
         window.resetMyVote = () => {
             localStorage.removeItem('hasVoted11A1');
-            alert("Đã reset trạng thái bỏ phiếu trên thiết bị này. Bạn có thể bầu lại (chỉ dùng để test).");
+            localStorage.removeItem('votedTimestamp11A1');
+            alert("Đã reset trạng thái bỏ phiếu trên thiết bị này. Bạn có thể bầu lại (dùng để test).");
             updateVotingUIVisibility();
+        }
+
+        // 🔥 NÚT RESET TOÀN BỘ HỆ THỐNG (Xóa ứng cử viên, Xóa lịch sử, Reset lượt vote của tất cả mọi người)
+        window.resetAllSystem = async () => {
+            const confirmMsg = "⚠️ CẢNH BÁO NGUY HIỂM!\n\nBạn có chắc chắn muốn RESET TOÀN BỘ hệ thống không?\n- Xóa TOÀN BỘ danh sách ứng cử viên.\n- Xóa TOÀN BỘ số phiếu bầu hiện có.\n- Cho phép TẤT CẢ học sinh/máy tính BẦU LẠI từ đầu.\n\nHành động này không thể khôi phục!";
+            if (confirm(confirmMsg)) {
+                const doubleCheck = prompt("Nhập chữ 'DELETE' để xác nhận xóa sạch dữ liệu:");
+                if (doubleCheck === 'DELETE') {
+                    try {
+                        // 1. Xóa toàn bộ ứng cử viên
+                        await remove(ref(db, 'candidates'));
+                        
+                        // 2. Cập nhật timestamp reset hệ thống mới & Đóng bình chọn
+                        const newResetTime = Date.now();
+                        await set(ref(db, 'settings'), {
+                            isVotingOpen: false,
+                            resetTimestamp: newResetTime
+                        });
+
+                        // 3. Xóa cờ local storage máy hiện tại
+                        localStorage.removeItem('hasVoted11A1');
+                        localStorage.removeItem('votedTimestamp11A1');
+
+                        alert("✅ ĐÃ RESET TOÀN BỘ HỆ THỐNG THÀNH CÔNG!\nDữ liệu bầu cử đã được đưa về trạng thái mới hoàn toàn.");
+                    } catch (err) {
+                        console.error(err);
+                        alert("Lỗi khi reset: " + err.message);
+                    }
+                } else {
+                    alert("Đã hủy thao tác reset.");
+                }
+            }
         }
 
         // Cập nhật giao diện bầu chọn dựa vào trạng thái đóng/mở và cờ LocalStorage
@@ -313,12 +358,10 @@
             const openSection = document.getElementById('voting-open-section');
 
             if (!isVotingOpen) {
-                // Đang đóng
                 closedMsg.classList.remove('hidden');
                 votedMsg.classList.add('hidden');
                 openSection.classList.add('hidden');
             } else {
-                // Đang mở, kiểm tra xem đã vote chưa
                 closedMsg.classList.add('hidden');
                 if (hasVoted) {
                     votedMsg.classList.remove('hidden');
@@ -347,7 +390,7 @@
                         }
                         canvas.width = width; canvas.height = height;
                         canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Nén JPEG 70%
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
                     };
                     img.src = e.target.result;
                 };
@@ -401,7 +444,7 @@
             `).join('');
         }
 
-        // LOGIC BẦU CHỌN (Giao diện cho mọi người)
+        // LOGIC BẦU CHỌN
         function renderVotingCandidates() {
             const container = document.getElementById('voter-candidates-list');
             container.innerHTML = candidates.map(c => `
@@ -434,7 +477,7 @@
             document.getElementById('selected-count').textContent = selectedCandidates.length;
         }
 
-        // Gửi phiếu bầu (Realtime Database update)
+        // Gửi phiếu bầu
         window.submitVotes = async () => {
             if(selectedCandidates.length < 1 || selectedCandidates.length > 3) {
                 alert("Vui lòng chọn từ 1 đến 3 người!"); return;
@@ -452,15 +495,15 @@
                     }
                 });
                 
-                await update(ref(db), updates); // Cập nhật cộng dồn số vote
+                await update(ref(db), updates);
                 
-                // LƯU TRẠNG THÁI ĐÃ VOTE VÀO TRÌNH DUYỆT
+                // LƯU THỜI ĐIỂM VÀ TRẠNG THÁI VOTE VÀO MÁY NGƯỜI DÙNG
                 localStorage.setItem('hasVoted11A1', 'true');
+                localStorage.setItem('votedTimestamp11A1', serverResetTimestamp || Date.now());
 
                 selectedCandidates = [];
                 document.getElementById('selected-count').textContent = 0;
                 
-                // Cập nhật lại giao diện, nó sẽ tự động chuyển sang màn hình "Bạn đã bỏ phiếu"
                 updateVotingUIVisibility();
                 
             } catch (error) {
@@ -474,25 +517,22 @@
         function renderResults() {
             if(candidates.length === 0) return;
             
-            // Sắp xếp giảm dần theo số phiếu
             const sorted = [...candidates].sort((a, b) => b.votes - a.votes);
             
-            // Bục vinh danh Top 3
             const podiumContainer = document.getElementById('podium-container');
             let podiumHTML = '';
             
-            if(sorted.length > 1) { // Hạng 2 (bên trái)
+            if(sorted.length > 1) {
                 podiumHTML += createPodiumItem(sorted[1], 2, 'podium-2');
             }
-            if(sorted.length > 0) { // Hạng 1 (ở giữa, cao nhất)
+            if(sorted.length > 0) {
                 podiumHTML += createPodiumItem(sorted[0], 1, 'podium-1', 'scale-110');
             }
-            if(sorted.length > 2) { // Hạng 3 (bên phải)
+            if(sorted.length > 2) {
                 podiumHTML += createPodiumItem(sorted[2], 3, 'podium-3');
             }
             podiumContainer.innerHTML = podiumHTML;
 
-            // Danh sách còn lại
             const listContainer = document.getElementById('results-list');
             listContainer.innerHTML = sorted.map((c, index) => `
                 <div class="flex items-center justify-between p-3 border-b hover:bg-gray-50">
