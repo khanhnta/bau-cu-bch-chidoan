@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bầu cử Ban Chấp Hành Chi Đoàn 11A1-K29</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,107 +15,116 @@
         body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f0fdf4; }
         .bg-doan { background-color: #00529c; }
         .text-doan { color: #00529c; }
-        .candidate-card.selected { border-color: #00529c; background-color: #e0f2fe; border-width: 3px; }
-        .podium-1 { height: 180px; background-color: #facc15; }
-        .podium-2 { height: 130px; background-color: #cbd5e1; }
-        .podium-3 { height: 100px; background-color: #d97706; }
+        .candidate-card.selected { border-color: #00529c; background-color: #e0f2fe; border-width: 2px; }
+        
+        /* Cấu hình chiều cao bục responsive */
+        .podium-1 { height: 130px; background-color: #facc15; }
+        .podium-2 { height: 90px; background-color: #cbd5e1; }
+        .podium-3 { height: 70px; background-color: #d97706; }
+        
+        @media (min-width: 640px) {
+            .podium-1 { height: 180px; }
+            .podium-2 { height: 130px; }
+            .podium-3 { height: 100px; }
+            .candidate-card.selected { border-width: 3px; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-doan text-white py-6 shadow-md">
-        <div class="container mx-auto px-4 flex flex-col items-center text-center">
-            <div class="flex items-center mb-4">
+    <header class="bg-doan text-white py-4 md:py-6 shadow-md">
+        <div class="container mx-auto px-2 md:px-4 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center mb-3 md:mb-4">
                 <img src="https://upload.wikimedia.org/wikipedia/vi/0/09/Huy_Hi%E1%BB%87u_%C4%90o%C3%A0n.png?utm_source=vi.wikipedia.org&utm_campaign=index&utm_content=original" 
                      alt="Logo Đoàn" 
-                     class="w-16 h-16 mr-4 object-contain"
+                     class="w-12 h-12 md:w-16 md:h-16 mr-3 md:mr-4 object-contain"
                      onerror="this.onerror=null; this.src='https://hoithoatviendiemdem.mediacdn.vn/thumb_w/640/2021/3/23/huy-hieu-doan-16164906560411883395992.png';">
-                <div>
-                    <h2 class="text-xl font-semibold uppercase tracking-wide">Đoàn TNCS Hồ Chí Minh Trường THPT Phan Huy Chú - Đống Đa</h2>
-                    <h1 class="text-3xl font-bold uppercase mt-1">Chi Đoàn 11A1-K29</h1>
+                <div class="text-left">
+                    <h2 class="text-xs sm:text-sm md:text-xl font-semibold uppercase tracking-wide">Đoàn TNCS Hồ Chí Minh Trường THPT Phan Huy Chú - Đống Đa</h2>
+                    <h1 class="text-lg sm:text-2xl md:text-3xl font-bold uppercase mt-1">Chi Đoàn 11A1-K29</h1>
                 </div>
             </div>
-            <div class="w-full max-w-3xl border-t border-white/30 my-4"></div>
-            <h2 class="text-3xl font-bold text-yellow-300 uppercase">Bầu Ban Chấp Hành Chi Đoàn</h2>
-            <h3 class="text-2xl font-semibold mt-2">Nhiệm Kỳ 2026 - 2027</h3>
+            <div class="w-full max-w-3xl border-t border-white/30 my-2 md:my-4"></div>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-yellow-300 uppercase px-2">Bầu Ban Chấp Hành Chi Đoàn</h2>
+            <h3 class="text-base sm:text-lg md:text-2xl font-semibold mt-1 md:mt-2">Nhiệm Kỳ 2026 - 2027</h3>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl" id="app-container">
+    <main class="flex-grow container mx-auto px-3 md:px-4 py-6 md:py-8 max-w-5xl" id="app-container">
         <!-- Loading State -->
         <div id="loading-screen" class="text-center py-20">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            <p class="mt-4 text-gray-600 font-medium">Đang tải dữ liệu bầu cử...</p>
+            <div class="inline-block animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="mt-4 text-gray-600 font-medium text-sm md:text-base">Đang tải dữ liệu bầu cử...</p>
         </div>
 
         <!-- Auth Login -->
-        <div id="login-screen" class="hidden max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 mt-10 border border-gray-100">
-            <h3 class="text-2xl font-bold text-center mb-6 text-doan">Đăng nhập Ban Chấp hành Chi đoàn</h3>
+        <div id="login-screen" class="hidden max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8 mt-4 md:mt-10 border border-gray-100">
+            <h3 class="text-xl md:text-2xl font-bold text-center mb-6 text-doan">Đăng nhập Ban Chấp hành</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tài khoản</label>
-                    <input type="text" id="username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập tài khoản">
+                    <input type="text" id="username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base" placeholder="Nhập tài khoản">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-                    <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập mật khẩu">
+                    <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm md:text-base" placeholder="Nhập mật khẩu">
                 </div>
-                <button onclick="loginAdmin()" class="w-full bg-doan text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition">Đăng nhập</button>
+                <button onclick="loginAdmin()" class="w-full bg-doan text-white font-bold py-2 md:py-3 rounded-lg hover:bg-blue-800 transition text-sm md:text-base">Đăng nhập</button>
                 <div class="text-center mt-4">
-                    <button onclick="showVotingScreen()" class="text-sm text-gray-500 hover:text-doan underline">Chuyển sang giao diện Bầu chọn</button>
+                    <button onclick="showVotingScreen()" class="text-xs md:text-sm text-gray-500 hover:text-doan underline">Chuyển sang giao diện Bầu chọn</button>
                 </div>
             </div>
         </div>
 
         <!-- Admin Dashboard -->
-        <div id="admin-screen" class="hidden space-y-8">
-            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow flex-wrap gap-4">
-                <h3 class="text-xl font-bold text-gray-800">Bảng điều khiển Ban Chấp hành Chi đoàn</h3>
-                <div class="space-x-2 sm:space-x-3 flex flex-wrap gap-y-2">
-                    <button onclick="toggleVotingStatus()" id="btn-toggle-voting" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Mở bình chọn</button>
-                    <button onclick="showResultsScreen()" class="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">Xem kết quả</button>
-                    <button onclick="resetMyVote()" class="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600">Reset Phiếu máy này</button>
-                    <button onclick="resetAllSystem()" class="px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-800 shadow">🔥 Reset TOÀN BỘ</button>
-                    <button onclick="logoutAdmin()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Đăng xuất</button>
+        <div id="admin-screen" class="hidden space-y-6 md:space-y-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-lg shadow gap-4">
+                <h3 class="text-lg md:text-xl font-bold text-gray-800">Bảng điều khiển</h3>
+                <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                    <button onclick="toggleVotingStatus()" id="btn-toggle-voting" class="flex-1 md:flex-none px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">Mở bình chọn</button>
+                    <button onclick="showResultsScreen()" class="flex-1 md:flex-none px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">Xem kết quả</button>
+                    <button onclick="resetMyVote()" class="flex-1 md:flex-none px-3 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600">Reset máy này</button>
+                    <button onclick="resetAllSystem()" class="w-full md:w-auto px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-800 shadow">🔥 Reset TOÀN BỘ</button>
+                    <button onclick="logoutAdmin()" class="w-full md:w-auto px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300">Đăng xuất</button>
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 <!-- Add Candidate Form -->
-                <div class="md:col-span-1 bg-white p-6 rounded-lg shadow">
-                    <h4 class="text-lg font-bold mb-4 border-b pb-2">Thêm Ứng cử viên</h4>
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow">
+                    <h4 class="text-base md:text-lg font-bold mb-4 border-b pb-2">Thêm Ứng cử viên</h4>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
-                            <input type="text" id="candidate-name" class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="candidate-name" class="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ảnh chân dung (Tải lên)</label>
-                            <input type="file" id="candidate-image-file" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-doan hover:file:bg-blue-100">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ảnh chân dung</label>
+                            <input type="file" id="candidate-image-file" accept="image/*" class="w-full text-xs md:text-sm text-gray-500 file:mr-2 file:py-1 file:px-2 md:file:mr-4 md:file:py-2 md:file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-blue-50 file:text-doan hover:file:bg-blue-100">
                         </div>
-                        <button onclick="addCandidate()" class="w-full bg-doan text-white font-bold py-2 rounded-lg hover:bg-blue-800 transition">Thêm vào danh sách</button>
+                        <button onclick="addCandidate()" class="w-full bg-doan text-white font-bold py-2 rounded-lg hover:bg-blue-800 transition text-sm">Thêm vào danh sách</button>
                     </div>
                 </div>
 
                 <!-- Candidates List -->
-                <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
-                    <h4 class="text-lg font-bold mb-4 border-b pb-2">Danh sách hiện tại</h4>
-                    <div id="admin-candidates-list" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div class="md:col-span-2 bg-white p-4 md:p-6 rounded-lg shadow">
+                    <h4 class="text-base md:text-lg font-bold mb-4 border-b pb-2">Danh sách hiện tại</h4>
+                    <div id="admin-candidates-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                         <!-- Danh sách render bằng JS -->
                     </div>
                 </div>
             </div>
 
             <!-- QR Code Section -->
-            <div id="qr-section" class="hidden bg-white p-8 rounded-lg shadow text-center flex-col items-center">
-                <h4 class="text-2xl font-bold mb-2 text-doan">MÃ QR BẦU CHỌN ONLINE</h4>
-                <p class="text-gray-600 mb-6">Yêu cầu các thành viên quét mã này để vào trang bỏ phiếu ẩn danh.</p>
-                <div id="qr-code-container" class="mx-auto p-4 bg-white border-4 border-doan rounded-xl shadow-sm inline-block">
-                    <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
+            <div id="qr-section" class="hidden bg-white p-4 md:p-8 rounded-lg shadow text-center flex-col items-center">
+                <h4 class="text-xl md:text-2xl font-bold mb-2 text-doan">MÃ QR BẦU CHỌN ONLINE</h4>
+                <p class="text-sm md:text-base text-gray-600 mb-4 md:mb-6">Quét mã này để vào trang bỏ phiếu ẩn danh.</p>
+                <div id="qr-code-container" class="mx-auto p-2 md:p-4 bg-white border-2 md:border-4 border-doan rounded-xl shadow-sm inline-block w-48 h-48 md:w-64 md:h-64">
+                    <img id="qr-image" src="" alt="QR Code" class="w-full h-full object-contain">
                 </div>
-                <div class="mt-4 text-lg font-mono bg-gray-100 px-4 py-2 rounded break-all w-full max-w-md">
+                <div class="mt-4 text-xs md:text-sm font-mono bg-gray-100 px-2 py-2 rounded break-all w-full max-w-md">
                     <a href="#" id="voting-link" target="_blank" class="text-blue-600 hover:underline">Link web</a>
                 </div>
             </div>
@@ -124,84 +133,84 @@
         <!-- Voting Screen -->
         <div id="voting-screen" class="hidden">
             <!-- Thông báo chưa mở bầu chọn -->
-            <div id="voting-closed-msg" class="hidden text-center py-20 bg-white rounded-xl shadow">
-                <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                <h2 class="text-2xl font-bold text-gray-800">Chưa mở bầu chọn</h2>
-                <p class="text-gray-500 mt-2">Vui lòng chờ Ban Chấp hành Chi đoàn kích hoạt hệ thống bỏ phiếu.</p>
+            <div id="voting-closed-msg" class="hidden text-center py-12 md:py-20 bg-white rounded-xl shadow px-4">
+                <svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">Chưa mở bầu chọn</h2>
+                <p class="text-sm md:text-base text-gray-500 mt-2">Vui lòng chờ Ban Chấp hành Chi đoàn kích hoạt hệ thống bỏ phiếu.</p>
             </div>
 
             <!-- Thông báo ĐÃ BẦU CHỌN RỒI -->
-            <div id="already-voted-msg" class="hidden text-center py-20 bg-white rounded-xl shadow">
-                <svg class="w-20 h-20 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h2 class="text-3xl font-bold text-gray-800">Bạn đã bỏ phiếu thành công!</h2>
-                <p class="text-gray-600 mt-3 text-lg">Mỗi người chỉ được tham gia bầu chọn 1 lần duy nhất để đảm bảo tính công bằng.</p>
+            <div id="already-voted-msg" class="hidden text-center py-12 md:py-20 bg-white rounded-xl shadow px-4">
+                <svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Bạn đã bỏ phiếu thành công!</h2>
+                <p class="text-gray-600 mt-2 md:mt-3 text-sm md:text-lg">Mỗi người chỉ được tham gia bầu chọn 1 lần duy nhất để đảm bảo tính công bằng.</p>
             </div>
 
             <!-- Khu vực bầu chọn -->
-            <div id="voting-open-section" class="hidden">
-                <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded shadow-sm">
-                    <p class="text-yellow-800 font-medium text-center text-lg">
-                        ⚠️ Quy định: Mỗi lượt chỉ được bầu <strong>tối đa 3 người</strong>. Bầu chọn hoàn toàn ẩn danh.
+            <div id="voting-open-section" class="hidden pb-24 md:pb-28">
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 p-3 md:p-4 mb-6 md:mb-8 rounded shadow-sm mx-2 md:mx-0">
+                    <p class="text-yellow-800 font-medium text-center text-sm md:text-base">
+                        ⚠️ Lên danh sách chọn <strong>tối đa 3 người</strong>.
                     </p>
                 </div>
 
-                <div id="voter-candidates-list" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <!-- Chỉnh Grid tự động đáp ứng mọi thiết bị -->
+                <div id="voter-candidates-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 mb-8 px-2 md:px-0">
                     <!-- Danh sách ứng cử viên cho voter -->
                 </div>
 
-                <div class="sticky bottom-4 bg-white/90 backdrop-blur p-4 rounded-xl shadow-xl border border-gray-200 flex justify-between items-center max-w-2xl mx-auto">
-                    <div class="text-lg font-semibold text-gray-700">
-                        Đã chọn: <span id="selected-count" class="text-doan text-xl font-bold">0</span> / 3
+                <div class="fixed bottom-4 left-0 right-0 z-50 px-4 flex justify-center">
+                    <div class="bg-white/95 backdrop-blur-md p-3 md:p-4 rounded-xl shadow-2xl border border-gray-200 flex justify-between items-center w-full max-w-2xl">
+                        <div class="text-base md:text-lg font-semibold text-gray-700">
+                            Đã chọn: <span id="selected-count" class="text-doan text-lg md:text-xl font-bold">0</span>/3
+                        </div>
+                        <button onclick="submitVotes()" id="btn-submit-vote" class="bg-doan text-white px-5 py-2 md:px-8 md:py-3 rounded-lg font-bold text-sm md:text-lg hover:bg-blue-800 transition disabled:opacity-50 shadow-md">
+                            GỬI PHIẾU
+                        </button>
                     </div>
-                    <button onclick="submitVotes()" id="btn-submit-vote" class="bg-doan text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-blue-800 transition disabled:opacity-50">
-                        GỬI PHIẾU BẦU
-                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Results Screen -->
         <div id="results-screen" class="hidden">
-            <!-- Vùng cần in PDF -->
-            <div id="results-export-content" class="bg-[#f0fdf4] pb-6 rounded-xl">
-                <h2 class="text-3xl font-bold text-center text-doan mb-10 pt-4 uppercase">Kết quả Bầu cử Ban Chấp Hành</h2>
+            <div id="results-export-content" class="bg-[#f0fdf4] pb-4 md:pb-6 rounded-xl">
+                <h2 class="text-xl md:text-3xl font-bold text-center text-doan mb-6 md:mb-10 pt-4 uppercase px-2">Kết quả Bầu cử Ban Chấp Hành</h2>
                 
-                <!-- Podium cho top 3 -->
-                <div class="flex justify-center items-end h-80 mb-16 gap-2 sm:gap-6 px-4" id="podium-container">
+                <!-- Podium cho top 3 - Responsive -->
+                <div class="flex justify-center items-end min-h-[200px] md:min-h-[280px] mb-8 md:mb-16 gap-1 sm:gap-4 px-2" id="podium-container">
                     <!-- Render bằng JS -->
                 </div>
 
                 <!-- Những người còn lại -->
-                <div class="bg-white rounded-xl shadow-lg p-6 max-w-4xl mx-auto border">
-                    <h3 class="text-xl font-bold mb-4 border-b pb-2">Danh sách kết quả chi tiết</h3>
-                    <div id="results-list" class="space-y-3">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl mx-auto border mx-2 md:mx-auto">
+                    <h3 class="text-lg md:text-xl font-bold mb-3 md:mb-4 border-b pb-2">Danh sách kết quả chi tiết</h3>
+                    <div id="results-list" class="space-y-2 md:space-y-3">
                         <!-- Render bằng JS -->
                     </div>
                 </div>
             </div>
             
-            <!-- Cụm nút bấm chức năng (Không in vào PDF) -->
-            <div class="text-center mt-8 flex justify-center gap-4 flex-wrap border-t border-gray-300 pt-6">
-                <button onclick="exportExcel()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow flex items-center gap-2">
-                    📊 Xuất File Excel
+            <div class="text-center mt-6 md:mt-8 flex justify-center gap-3 md:gap-4 flex-wrap border-t border-gray-300 pt-4 md:pt-6">
+                <button onclick="exportExcel()" class="px-4 py-2 md:px-6 md:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm md:text-base font-bold shadow flex items-center gap-2">
+                    📊 Xuất Excel
                 </button>
-                <button onclick="exportPDF(event)" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold shadow flex items-center gap-2">
-                    📄 Xuất File PDF
+                <button onclick="exportPDF(event)" class="px-4 py-2 md:px-6 md:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm md:text-base font-bold shadow flex items-center gap-2">
+                    📄 Xuất PDF
                 </button>
-                <button onclick="showAdminScreen()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-bold shadow">
-                    ⬅️ Trở lại Bảng điều khiển
+                <button onclick="showAdminScreen()" class="w-full md:w-auto px-4 py-2 md:px-6 md:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm md:text-base font-bold shadow">
+                    ⬅️ Về Bảng điều khiển
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- Firebase và Logic JS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, remove, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         // ==========================================
-        // CẤU HÌNH FIREBASE MỚI NHẤT CỦA BẠN
+        // CẤU HÌNH FIREBASE CỦA BẠN (GIỮ NGUYÊN)
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyAMM46yqLMjFujlkcxNFbsnJJjL-LjF4Kk",
@@ -297,11 +306,6 @@
             }
         }
 
-        // =====================================
-        // TÍNH NĂNG XUẤT FILE 
-        // =====================================
-        
-        // Xuất File Excel
         window.exportExcel = () => {
             if (candidates.length === 0) { alert("Chưa có ứng cử viên nào để xuất dữ liệu!"); return; }
             
@@ -318,7 +322,6 @@
             XLSX.writeFile(workbook, "KetQua_BauCu_BCH_11A1_K29.xlsx");
         };
 
-        // Xuất File PDF
         window.exportPDF = (event) => {
             if (candidates.length === 0) { alert("Chưa có dữ liệu để xuất PDF!"); return; }
 
@@ -403,21 +406,21 @@
 
         function renderAdminCandidates() {
             document.getElementById('admin-candidates-list').innerHTML = candidates.map(c => `
-                <div class="border rounded-lg p-3 text-center relative bg-gray-50">
-                    <button onclick="deleteCandidate('${c.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700">&times;</button>
-                    <img src="${c.image}" class="w-16 h-16 rounded-full mx-auto object-cover mb-2 border border-gray-200">
-                    <div class="font-semibold text-sm line-clamp-2">${c.name}</div>
+                <div class="border rounded-lg p-2 md:p-3 text-center relative bg-gray-50">
+                    <button onclick="deleteCandidate('${c.id}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700">&times;</button>
+                    <img src="${c.image}" class="w-12 h-12 md:w-16 md:h-16 rounded-full mx-auto object-cover mb-1 md:mb-2 border border-gray-200">
+                    <div class="font-semibold text-xs md:text-sm line-clamp-2">${c.name}</div>
                 </div>
             `).join('');
         }
 
         function renderVotingCandidates() {
             document.getElementById('voter-candidates-list').innerHTML = candidates.map(c => `
-                <div onclick="toggleSelect('${c.id}')" id="card-${c.id}" class="candidate-card bg-white border-2 border-transparent rounded-xl p-4 text-center cursor-pointer shadow hover:shadow-md transition">
-                    <img src="${c.image}" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 border-2 border-gray-100">
-                    <h3 class="font-bold text-gray-800">${c.name}</h3>
-                    <div class="mt-2 text-transparent check-icon" id="check-${c.id}">
-                        <svg class="w-8 h-8 mx-auto text-doan" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <div onclick="toggleSelect('${c.id}')" id="card-${c.id}" class="candidate-card bg-white border-2 border-transparent rounded-xl p-3 md:p-4 text-center cursor-pointer shadow hover:shadow-md transition relative">
+                    <img src="${c.image}" class="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full mx-auto object-cover mb-2 border border-gray-100">
+                    <h3 class="font-bold text-gray-800 text-xs sm:text-sm md:text-base leading-snug line-clamp-2 h-8 md:h-10 flex items-center justify-center">${c.name}</h3>
+                    <div class="absolute top-2 right-2 text-transparent check-icon transition-all duration-200" id="check-${c.id}">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 text-doan bg-white rounded-full shadow-sm" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                     </div>
                 </div>
             `).join('');
@@ -456,29 +459,29 @@
             
             let podiumHTML = '';
             if(sorted.length > 1) podiumHTML += createPodiumItem(sorted[1], 2, 'podium-2');
-            if(sorted.length > 0) podiumHTML += createPodiumItem(sorted[0], 1, 'podium-1', 'scale-110');
+            if(sorted.length > 0) podiumHTML += createPodiumItem(sorted[0], 1, 'podium-1', 'scale-105 md:scale-110');
             if(sorted.length > 2) podiumHTML += createPodiumItem(sorted[2], 3, 'podium-3');
             document.getElementById('podium-container').innerHTML = podiumHTML;
 
             document.getElementById('results-list').innerHTML = sorted.map((c, index) => `
-                <div class="flex items-center justify-between p-3 border-b hover:bg-gray-50">
-                    <div class="flex items-center gap-4">
-                        <div class="font-bold text-gray-500 w-6">#${index + 1}</div>
-                        <img src="${c.image}" class="w-10 h-10 rounded-full object-cover">
-                        <div class="font-semibold">${c.name}</div>
+                <div class="flex items-center justify-between p-2 md:p-3 border-b hover:bg-gray-50">
+                    <div class="flex items-center gap-2 md:gap-4 w-3/4">
+                        <div class="font-bold text-gray-500 w-5 md:w-6 text-sm md:text-base">#${index + 1}</div>
+                        <img src="${c.image}" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover">
+                        <div class="font-semibold text-sm md:text-base truncate">${c.name}</div>
                     </div>
-                    <div class="font-bold text-doan bg-blue-50 px-3 py-1 rounded-full">${c.votes} phiếu</div>
+                    <div class="font-bold text-doan bg-blue-50 px-2 py-1 rounded-full text-xs md:text-sm whitespace-nowrap">${c.votes} phiếu</div>
                 </div>
             `).join('');
         }
 
         function createPodiumItem(candidate, rank, heightClass, extraClass = '') {
             return `
-                <div class="flex flex-col items-center w-28 sm:w-36 ${extraClass} transform transition-all">
-                    <img src="${candidate.image}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover mb-2 border-4 border-white shadow-md z-10">
-                    <div class="font-bold text-sm text-center mb-1 leading-tight h-10">${candidate.name}</div>
-                    <div class="font-bold text-doan mb-2">${candidate.votes} phiếu</div>
-                    <div class="w-full ${heightClass} rounded-t-lg shadow-inner flex justify-center pt-2 text-2xl font-black text-white/50">
+                <div class="flex flex-col items-center w-[30%] max-w-[120px] sm:w-28 md:w-36 ${extraClass} transform transition-all">
+                    <img src="${candidate.image}" class="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-full object-cover mb-1 md:mb-2 border-2 md:border-4 border-white shadow-md z-10">
+                    <div class="font-bold text-[10px] sm:text-xs md:text-sm text-center mb-0.5 md:mb-1 leading-tight h-7 md:h-10 line-clamp-2 px-1">${candidate.name}</div>
+                    <div class="font-bold text-doan text-[10px] sm:text-xs md:text-base mb-1 md:mb-2">${candidate.votes} phiếu</div>
+                    <div class="w-full ${heightClass} rounded-t-lg shadow-inner flex justify-center pt-1 md:pt-2 text-lg md:text-2xl font-black text-white/50">
                         ${rank}
                     </div>
                 </div>
