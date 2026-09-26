@@ -205,6 +205,17 @@
         </div>
     </main>
 
+    <!-- Footer - Thêm lại nút đăng nhập quản trị viên -->
+    <footer class="mt-auto py-6 bg-white border-t border-gray-200">
+        <div class="container mx-auto text-center">
+            <p class="text-xs md:text-sm text-gray-500 mb-2">© 2026 Bản quyền thuộc về Chi Đoàn 11A1-K29.</p>
+            <button onclick="showLoginScreen()" class="text-xs md:text-sm text-gray-400 hover:text-doan inline-flex items-center gap-1 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                Dành cho Quản trị viên
+            </button>
+        </div>
+    </footer>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, remove, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
