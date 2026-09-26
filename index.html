@@ -201,16 +201,16 @@
         import { getDatabase, ref, onValue, push, remove, set, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         // ==========================================
-        // CẤU HÌNH FIREBASE - (BẠN ĐIỀN API KEY CỦA BẠN VÀO NHÉ)
+        // CẤU HÌNH FIREBASE MỚI NHẤT CỦA BẠN
         // ==========================================
         const firebaseConfig = {
-            apiKey: "API_KEY_CUA_BAN", 
+            apiKey: "AIzaSyAMM46yqLMjFujlkcxNFbsnJJjL-LjF4Kk",
             authDomain: "baucu-bch-a1k29.firebaseapp.com",
-            databaseURL: "https://baucu-bch-a1k29-default-rtdb.firebaseio.com/",
+            databaseURL: "https://baucu-bch-a1k29-default-rtdb.firebaseio.com",
             projectId: "baucu-bch-a1k29",
             storageBucket: "baucu-bch-a1k29.firebasestorage.app",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
+            messagingSenderId: "839316128590",
+            appId: "1:839316128590:web:41b4782cc7ecda5fd8d41f"
         };
         // ==========================================
 
@@ -326,7 +326,6 @@
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             
-            // Hiệu ứng đang tải
             btn.innerHTML = "⏳ Đang tạo File PDF...";
             btn.disabled = true;
 
@@ -338,7 +337,6 @@
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // Tiến hành xuất PDF
             html2pdf().set(opt).from(element).save().then(() => {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
